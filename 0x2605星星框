@@ -1,0 +1,4 @@
+a=chr(0x2605)
+print(a*11)
+print(a+"我喜欢数据科学导论"+a)
+print(a*11)
