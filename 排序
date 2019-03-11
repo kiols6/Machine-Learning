@@ -1,0 +1,4 @@
+x=32;y=2;z=399
+list=[x,y,z]
+list.sort()
+print(list)
