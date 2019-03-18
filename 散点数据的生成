@@ -1,0 +1,10 @@
+#散点数据的生成
+import pandas as pd
+import numpy as np
+np.random.seed(4889)
+x=np.array([10]+list(range(10,29)))
+error=np.round(np.random.randn(20))
+y=x+error
+data=pd.DataFrame({"x":x,"y":y})
+print data
+data.to_csv("/home/aistudio/data/data4678",index=False)
