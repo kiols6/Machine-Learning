@@ -1,0 +1,16 @@
+#使用matplotlib，将数据可视化
+import matplotlib.pyplot as plt
+#创建一个图形框
+fig=plt.figure(figsize=(6,6),dpi=80)
+ax=fig.add_subplot(111)#一副一行一列
+#设置坐标轴
+ax.set_xlabel("$x$")
+ax.set_xticks(range(10,31,5))
+ax.set_ylabel("$y$")
+ax.set_yticks(range(10,31,5))
+#画图，点的颜色为绿色
+ax.scatter(data.x,data.y,color="c",label="$y=x+\epsilon$")
+plt.legend(shadow=True)
+
+pic=plt.show()
+pic
