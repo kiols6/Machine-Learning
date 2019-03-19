@@ -138,22 +138,6 @@ def linearModel(data):
     error, score = evaluateModel(model, testData, features, labels)
     # 图形化模型结果
     visualizeModel(model, data, features, labels, error, score)
-
-
-def readData(path):
-    """
-    使用pandas读取数据
-    """
-    data = pd.read_csv(path)
-    return data
-
-
 if __name__ == "__main__":
-    homePath = os.path.dirname(os.path.abspath(__file__))
-    # Windows下的存储路径与Linux并不相同
-    if os.name == "nt":
-        dataPath = "%s\\data\\simple_example.csv" % homePath
-    else:
-        dataPath = "%s/data/simple_example.csv" % homePath
-    data = readData(dataPath)
-linearModel(data)
+    data = pd.read_csv(path)
+    linearModel(data)
