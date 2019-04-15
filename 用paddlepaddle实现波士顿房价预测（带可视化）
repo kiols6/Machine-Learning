@@ -1,0 +1,85 @@
+#导入所需的库
+import pandas as pd
+import matplotlib.pyplot as plt
+import matplotlib
+import numpy as np
+
+###导入paddle.v2机器学习包及波士顿房价数据信息
+import paddle.v2 as paddle
+import paddle.v2.dataset.uci_housing as uci_housing
+
+###数据预处理
+reader = paddle.batch(paddle.reader.shuffle(uci_housing.train(),buf_size=500),batch_size=2)
+###初始化PaddlePaddle
+paddle.init(use_gpu=False,trainer_count=1)
+
+###模型配置
+
+#输入数据
+x = paddle.layer.data(name = 'x' , type = paddle.data_type.dense_vector(13)) #13维的数组，用于描述特征
+#模型输出 
+y_predict = paddle.layer.fc(input = x,size = 1,act = paddle.activation.Linear()) #用全连接层来将所有的特征归一综合
+#标注数据
+y = paddle.layer.data(name = 'y' , type = paddle.data_type.dense_vector(1)) #数据中原始的房价的“标签值”
+#使用MSE均方误差作为损失函数，用于描述假设函数的合理性
+cost = paddle.layer.square_error_cost(input = y_predict , label = y)
+
+###梯度下降，使得cost最小
+
+#创建参数
+parameters = paddle.parameters.create(cost)
+
+#创建Trainer
+#optimizer本质上是梯度下降的公式
+optimizer = paddle.optimizer.Momentum(momentum=0,learning_rate=0.001)
+#使用梯度下降模型SGD（Stochastic Gradient Descent）
+trainer = paddle.trainer.SGD(cost=cost,parameters=parameters,update_equation=optimizer)
+feeding={'x': 0, 'y': 1}
+# event_handler 是用于打印训练的相关信息
+
+def event_handler(event):
+    if isinstance(event, paddle.event.EndIteration):
+        if event.batch_id % 100 == 0:
+            print "Pass %d, Batch %d, Cost %f" % (
+                event.pass_id, event.batch_id, event.cost)
+
+    if isinstance(event, paddle.event.EndPass):
+        result = trainer.test(
+            reader=paddle.batch(
+                uci_housing.test(), batch_size=2),
+            feeding=feeding)
+        print "Test %d, Cost %f" % (event.pass_id, result.cost)
+        
+#生成测试数据
+test_data_creator = paddle.dataset.uci_housing.test()
+test_data = []
+test_label = []
+
+for item in test_data_creator():
+    test_data.append((item[0],))
+    test_label.append(item[1])
+    if len(test_data) == 100:
+        break
+   
+#推测价格
+probs = paddle.infer(
+    output_layer=y_predict, parameters=parameters, input=test_data)
+
+for i in xrange(len(probs)):
+    print "label=" + str(test_label[i][0]) + ", predict=" + str(probs[i][0])
+   
+#预测结果可视化
+fig = plt.figure(figsize=(6,6),dpi=80)
+ax = fig.add_subplot(111)
+plt.xlabel("Real Price")
+ax.set_xticks(range(0,50,5))
+plt.ylabel("Prodict Price")
+ax.set_yticks(range(0,50,5))
+test_label=np.array(test_label)
+plt.scatter(test_label,probs)
+x = np.arange(5,35)
+y = x
+plt.plot(x,y)
+plt.show()
+
+
